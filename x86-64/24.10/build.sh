@@ -28,7 +28,7 @@ PACKAGES="$PACKAGES curl"
 PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn"
 # 服务——FileBrowser 用户名admin 密码admin
-# PACKAGES="$PACKAGES luci-i18n-filebrowser-go-zh-cn"
+PACKAGES="$PACKAGES luci-i18n-filebrowser-go-zh-cn"
 PACKAGES="$PACKAGES luci-app-argon-config"
 PACKAGES="$PACKAGES luci-i18n-argon-config-zh-cn"
 #24.10
@@ -40,6 +40,7 @@ PACKAGES="$PACKAGES luci-i18n-homeproxy-zh-cn"
 PACKAGES="$PACKAGES openssh-sftp-server"
 PACKAGES="$PACKAGES luci-i18n-ddns-go-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-vlmcsd-zh-cn"
+PACKAGES="$PACKAGES luci-i18n-uhttpd-zh-cn"
 # 增加几个必备组件 方便用户安装iStore
 PACKAGES="$PACKAGES fdisk"
 PACKAGES="$PACKAGES script-utils"
