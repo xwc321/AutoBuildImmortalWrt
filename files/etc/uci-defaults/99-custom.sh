@@ -48,66 +48,27 @@ if [ "$count" -eq 1 ]; then
     uci delete network.lan.dns 
     uci commit network
 elif [ "$count" -gt 1 ]; then
-    # 提取第一个接口作为WAN
-    wan_ifname=$(echo "$ifnames" | awk '{print $1}')
-    # 剩余接口保留给LAN
-    lan_ifnames=$(echo "$ifnames" | cut -d ' ' -f2-)
-    # 设置WAN接口基础配置
-    uci set network.wan=interface
-    # 提取第一个接口作为WAN
-    uci set network.wan.device="$wan_ifname"
-    # WAN接口默认DHCP
-    uci set network.wan.proto='dhcp'
-    # 设置WAN6绑定网口eth0
-    uci set network.wan6=interface
-    uci set network.wan6.device="$wan_ifname"
-    # 更新LAN接口成员
-    # 查找对应设备的section名称
-    section=$(uci show network | awk -F '[.=]' '/\.@?device\[\d+\]\.name=.br-lan.$/ {print $2; exit}')
-    if [ -z "$section" ]; then
-        echo "error：cannot find device 'br-lan'." >>$LOGFILE
-    else
-        # 删除原来的ports列表
-        uci -q delete "network.$section.ports"
-        # 添加新的ports列表
-        for port in $lan_ifnames; do
-            uci add_list "network.$section.ports"="$port"
-        done
-        echo "ports of device 'br-lan' are update." >>$LOGFILE
-    fi
-    # LAN口设置静态IP
-    uci set network.lan.proto='static'
-    # 多网口设备 支持修改为别的管理后台地址 在Github Action 的UI上自行输入即可 
-    uci set network.lan.netmask='255.255.255.0'
-    # 设置路由器管理后台地址
-    IP_VALUE_FILE="/etc/config/custom_router_ip.txt"
-    if [ -f "$IP_VALUE_FILE" ]; then
-        CUSTOM_IP=$(cat "$IP_VALUE_FILE")
-        # 用户在UI上设置的路由器后台管理地址
-        uci set network.lan.ipaddr=$CUSTOM_IP
-        echo "custom router ip is $CUSTOM_IP" >> $LOGFILE
-    else
-        uci set network.lan.ipaddr='192.168.100.1'
-        echo "default router ip is 192.168.100.1" >> $LOGFILE
-    fi
-
-
-    # 判断是否启用 PPPoE
-    echo "print enable_pppoe value=== $enable_pppoe" >>$LOGFILE
-    if [ "$enable_pppoe" = "yes" ]; then
-        echo "PPPoE is enabled at $(date)" >>$LOGFILE
-        # 设置ipv4宽带拨号信息
-        uci set network.wan.proto='pppoe'
-        uci set network.wan.username=$pppoe_account
-        uci set network.wan.password=$pppoe_password
-        uci set network.wan.peerdns='1'
-        uci set network.wan.auto='1'
-        # 设置ipv6 默认不配置协议
-        uci set network.wan6.proto='none'
-        echo "PPPoE configuration completed successfully." >>$LOGFILE
-    else
-        echo "PPPoE is not enabled. Skipping configuration." >>$LOGFILE
-    fi
+  
+   # 多网口设备 支持修改为别的ip地址
+   uci set network.lan.ipaddr='192.168.100.1'
+   uci set network.lan.netmask='255.255.255.0'
+   echo "set 192.168.100.1 at $(date)" >> $LOGFILE
+   # 判断是否启用 PPPoE
+   echo "print enable_pppoe value=== $enable_pppoe" >> $LOGFILE
+   if [ "$enable_pppoe" = "yes" ]; then
+      echo "PPPoE is enabled at $(date)" >> $LOGFILE
+      # 设置ipv4宽带拨号信息
+       uci set network.wan.proto='pppoe'
+       uci set network.wan.username=$pppoe_account
+       uci set network.wan.password=$pppoe_password
+       uci set network.wan.peerdns='1'
+       uci set network.wan.auto='1'
+       # 设置ipv6 默认不配置协议
+       uci set network.wan6.proto='none'
+      echo "PPPoE configuration completed successfully." >> $LOGFILE
+   else
+      echo "PPPoE is not enabled. Skipping configuration." >> $LOGFILE
+   fi
 fi
 
 # 若安装了dockerd 则设置docker的防火墙规则
