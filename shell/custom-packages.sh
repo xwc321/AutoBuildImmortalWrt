@@ -49,3 +49,5 @@ CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-taskplan luci-i18n-taskplan-zh-cn"
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES easytier luci-app-easytier"
 # 统一文件共享
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES webdav2 luci-app-unishare"
+# 实时监控 by sirpdboy
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-netdata luci-i18n-netdata-zh-cn"
