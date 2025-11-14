@@ -55,4 +55,4 @@ CUSTOM_PACKAGES="$CUSTOM_PACKAGES webdav2 luci-app-unishare"
 # 实时监控 by sirpdboy
 # CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-netdata luci-i18n-netdata-zh-cn"
 # 流量监控 github.com/timsaya/luci-app-bandix
-CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-bandix luci-i18n-bandix-zh-cn"
+# CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-bandix luci-i18n-bandix-zh-cn"
