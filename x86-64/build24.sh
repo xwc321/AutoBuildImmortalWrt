@@ -65,7 +65,6 @@ PACKAGES="$PACKAGES luci-i18n-vlmcsd-zh-cn"
 PACKAGES="$PACKAGES luci-app-unblockneteasemusic"
 PACKAGES="$PACKAGES luci-i18n-vnstat2-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-statistics-zh-cn"
-PACKAGES="$PACKAGES luci-i18n-nlbwmon-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-p910nd-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-usb-printer-zh-cn"
 
