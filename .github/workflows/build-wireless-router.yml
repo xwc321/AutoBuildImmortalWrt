@@ -618,7 +618,7 @@ jobs:
               cetron_ct3003-stock | \
               xiaomi_redmi-router-ax6000 | \
               qihoo_360t7-ubootmod)
-                  tag=mediatek-filogic-openwrt-24.10.4
+                  tag=mediatek-filogic-openwrt-23.05.4
                   ls ${{ github.workspace }}/mediatek-filogic/
                   cp ${{ github.workspace }}/mediatek-filogic/build23.sh ${{ github.workspace }}/mediatek-filogic/build24.sh
                   ;;
