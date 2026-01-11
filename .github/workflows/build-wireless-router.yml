@@ -1,3 +1,21 @@
+
+# 此工作流99% 使用luci 24.10.x 来构建 极个别机型使用快照版和23.05.4版本来构建
+# 23.05.4 特有机型列表
+# abt_asr3000-ubootmod
+# cetron_ct3003-stock
+# cmcc_a10
+# cmcc_rax3000m-emmc-ubootmod
+# cmcc_rax3000m-nand-ubootmod
+# imou_lc-hx3001-ubootmod
+# jcg_q30 捷成
+# jcg_q30-ubootmod
+# qihoo_360t7-ubootmod
+# xiaomi_mi-router-wr30u-112m-nmbm
+# xiaomi_redmi-router-ax6000 该机型在24.10.4 分化为2个机型
+# —————————————————————————————24.10.4—————————————————————————————————
+# xiaomi_redmi-router-ax6000-stock ————原厂默认 bootloader（stock）版本
+# xiaomi_redmi-router-ax6000-ubootmod—————改装过 bootloader 的版本（ubootmod）
+
 name: Build Wireless Router ImmortalWrt 24.10.x
 
 on:
@@ -47,10 +65,9 @@ on:
           - cmcc_a10-stock
           - cmcc_a10-ubootmod
           - cmcc_rax3000m
-          - cmcc_rax3000me-ubootmod
-          - cmcc_rax3000m-emmc
-          - cmcc_rax3000m-emmc
-          - cmcc_rax3000m-nand
+          - cmcc_rax3000me
+          - cmcc_rax3000m-emmc-ubootmod
+          - cmcc_rax3000m-nand-ubootmod
           - imou_lc-hx3001-ubootmod
           - qihoo_360t7-ubootmod
           - xiaomi_mi-router-wr30u-112m-nmbm
@@ -574,7 +591,7 @@ jobs:
               case_platform="bcm53xx/generic"
           fi
 
-          # 判断机型 - 这是最重要的修改部分
+          # 判断机型
           case "$profile" in
               glinet_gl-b2200)
                   # 虽然它是高通ipq40xx平台 但由于都是gl机型 故放在一起 找起来方便
@@ -590,8 +607,8 @@ jobs:
                   tag=mediatek-mt7622-openwrt-24.10.4
                   echo "platform=mediatek/mt7622" >> $GITHUB_ENV
                   ;;
-              # 注意：cmcc_rax3000m-emmc-ubootmod 现在使用 24.10.x 版本构建
-              # 而 cmcc_rax3000m-nand-ubootmod 仍然使用 23.05.4 版本
+              # 下列机型目前没有24.10 因此采用23.05.4分支来构建
+              cmcc_rax3000m-emmc-ubootmod | \
               cmcc_rax3000m-nand-ubootmod | \
               cmcc_a10 | \
               abt_asr3000-ubootmod | \
@@ -600,17 +617,9 @@ jobs:
               jcg_q30-ubootmod | \
               xiaomi_mi-router-wr30u-112m-nmbm | \
               cetron_ct3003-stock | \
+              xiaomi_redmi-router-ax6000 | \
               qihoo_360t7-ubootmod)
                   tag=mediatek-filogic-openwrt-23.05.4
-                  echo "⚠️ 注意：此机型使用 23.05.4 版本构建"
-                  ls ${{ github.workspace }}/mediatek-filogic/
-                  cp ${{ github.workspace }}/mediatek-filogic/build23.sh ${{ github.workspace }}/mediatek-filogic/build24.sh
-                  ;;
-              # xiaomi_redmi-router-ax6000 在 24.10.x 中已经分化为两个机型
-              # 所以这里仍然使用 23.05.4 版本，除非用户选择了新的 -stock 或 -ubootmod 版本
-              xiaomi_redmi-router-ax6000)
-                  tag=mediatek-filogic-openwrt-23.05.4
-                  echo "⚠️ 注意：此机型使用 23.05.4 版本构建"
                   ls ${{ github.workspace }}/mediatek-filogic/
                   cp ${{ github.workspace }}/mediatek-filogic/build23.sh ${{ github.workspace }}/mediatek-filogic/build24.sh
                   ;;
@@ -620,7 +629,7 @@ jobs:
                       tag=$case_tag
                       echo "platform=$case_platform" >> $GITHUB_ENV
                   else
-                      # 默认分支 - cmcc_rax3000m-emmc-ubootmod 和其他大多数机型会走这里
+                      # 默认分支
                       tag=mediatek-filogic-openwrt-24.10.4
                   fi
                   ;;
@@ -644,7 +653,6 @@ jobs:
 
       - name: Create info
         run: |
-          profile="${{ github.event.inputs.profile }}"
           if [ "${{ github.event.inputs.include_docker }}" == "yes" ]; then
             extra_content="### 默认带docker"
             echo -e "\n $extra_content" >> ${{ github.workspace }}/mediatek-filogic/info.md
@@ -654,13 +662,6 @@ jobs:
           custom_router_ip="${{ github.event.inputs.custom_router_ip }}"
           extra_content_ip="#### 管理地址 $custom_router_ip"
           echo -e "\n $extra_content_ip" >> ${{ github.workspace }}/mediatek-filogic/info.md
-          
-          # 根据 profile 判断版本
-          if [[ "$profile" == "cmcc_rax3000m-emmc-ubootmod" ]]; then
-            echo -e "\n### 使用 ImmortalWrt 24.10.x 版本构建" >> ${{ github.workspace }}/mediatek-filogic/info.md
-          elif [[ "$profile" == "cmcc_rax3000m-nand-ubootmod" ]]; then
-            echo -e "\n### 使用 ImmortalWrt 23.05.4 版本构建" >> ${{ github.workspace }}/mediatek-filogic/info.md
-          fi
           
           
       - name: Upload ImmortalWrt as release assets
