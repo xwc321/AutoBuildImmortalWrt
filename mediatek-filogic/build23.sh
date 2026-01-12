@@ -70,8 +70,6 @@ PACKAGES="$PACKAGES luci-i18n-p910nd-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-usb-printer-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-ddns-go-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-vlmcsd-zh-cn"
-PACKAGES="$PACKAGES luci-i18n-p910nd-zh-cn"
-PACKAGES="$PACKAGES luci-i18n-usb-printer-zh-cn"
 # 增加几个必备组件 方便用户安装iStore
 PACKAGES="$PACKAGES fdisk"
 PACKAGES="$PACKAGES script-utils"
