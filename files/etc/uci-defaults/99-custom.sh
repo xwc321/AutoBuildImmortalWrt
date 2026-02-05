@@ -24,17 +24,13 @@ else
 fi
 
 # 1. 先获取所有物理接口列表
-	   
 ifnames=""
 for iface in /sys/class/net/*; do
     iface_name=$(basename "$iface")
-																		
     if [ -e "$iface/device" ] && echo "$iface_name" | grep -Eq '^eth|^en'; then
-							
         ifnames="$ifnames $iface_name"
     fi
 done
-					
 ifnames=$(echo "$ifnames" | awk '{$1=$1};1')
 
 count=$(echo "$ifnames" | wc -w)
@@ -55,17 +51,18 @@ case "$board_name" in
         echo "Using $board_name mapping: WAN=$wan_ifname LAN=$lan_ifnames" >>"$LOGFILE"
         ;;
     *)
-        # 默认第一个接口为WAN，其余为LAN
-        wan_ifname=$(echo "$ifnames" | awk '{print $1}')
-        lan_ifnames=$(echo "$ifnames" | cut -d ' ' -f2-)
-        echo "Using default mapping: WAN=$wan_ifname LAN=$lan_ifnames" >>"$LOGFILE"
+        # 修改为第二个接口为WAN，其余为LAN
+        wan_ifname=$(echo "$ifnames" | awk '{print $2}')
+        first_if=$(echo "$ifnames" | awk '{print $1}')
+        other_ifs=$(echo "$ifnames" | cut -d ' ' -f3-)
+        lan_ifnames="$first_if $other_ifs"
+        echo "Using modified mapping: WAN=$wan_ifname LAN=$lan_ifnames" >>"$LOGFILE"
         ;;
 esac
 
 # 3. 配置网络
 if [ "$count" -eq 1 ]; then
     # 单网口设备，DHCP模式
-																													
     uci set network.lan.proto='dhcp'
     uci delete network.lan.ipaddr
     uci delete network.lan.netmask
@@ -118,13 +115,11 @@ elif [ "$count" -gt 1 ]; then
     echo "enable_pppoe value: $enable_pppoe" >>$LOGFILE
     if [ "$enable_pppoe" = "yes" ]; then
         echo "PPPoE enabled, configuring..." >>$LOGFILE
-									
         uci set network.wan.proto='pppoe'
         uci set network.wan.username="$pppoe_account"
         uci set network.wan.password="$pppoe_password"
         uci set network.wan.peerdns='1'
         uci set network.wan.auto='1'
-										 
         uci set network.wan6.proto='none'
         echo "PPPoE config done." >>$LOGFILE
     else
