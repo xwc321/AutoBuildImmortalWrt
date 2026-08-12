@@ -2,6 +2,7 @@
 # Log file for debugging
 source shell/custom-packages.sh
 source shell/switch_repository.sh
+cd /home/build/immortalwrt || exit 1
 echo "第三方软件包: $CUSTOM_PACKAGES"
 LOGFILE="/tmp/uci-defaults-log.txt"
 echo "Starting 99-custom.sh at $(date)" >> $LOGFILE
@@ -46,9 +47,6 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - 开始构建固件..."
 # ============= imm仓库内的插件==============
 # 定义所需安装的包列表 下列插件你都可以自行删减
 PACKAGES=""
-PACKAGES="$PACKAGES -luci-theme-bootstrap"           # 排除bootstrap
-PACKAGES="$PACKAGES -luci-theme-bootstrap-dark"      # 排除bootstrapdark
-PACKAGES="$PACKAGES -luci-theme-bootstrap-light"     # 排除bootstraplight
 PACKAGES="$PACKAGES curl"
 PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn"
@@ -111,6 +109,23 @@ fi
 # 构建镜像
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Building image with the following packages:"
 echo "$PACKAGES"
+
+# ============= 在 make image 之前配置 .config 排除 Bootstrap =============
+cd /home/build/immortalwrt || exit 1
+[ ! -f .config ] && make defconfig
+./scripts/config --set-val CONFIG_PACKAGE_luci-theme-bootstrap n
+./scripts/config --set-val CONFIG_PACKAGE_luci-theme-bootstrap-dark n
+./scripts/config --set-val CONFIG_PACKAGE_luci-theme-bootstrap-light n
+./scripts/config --set-val CONFIG_PACKAGE_luci-theme-argon y
+./scripts/config --set-val CONFIG_PACKAGE_luci-app-argon-config y
+make defconfig
+
+# 设置默认主题为 Argon
+mkdir -p /home/build/immortalwrt/files/etc/config
+cat << EOF > /home/build/immortalwrt/files/etc/config/luci
+config luci 'main'
+    option theme 'argon'
+EOF
 
 make image PROFILE="generic" PACKAGES="$PACKAGES" FILES="/home/build/immortalwrt/files" ROOTFS_PARTSIZE=$PROFILE
 
