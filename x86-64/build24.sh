@@ -110,8 +110,14 @@ fi
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Building image with the following packages:"
 echo "$PACKAGES"
 
-# ============= 在 make image 之前配置 .config 排除 Bootstrap =============
-cd /home/build/immortalwrt || exit 1
+# ============= 加强 Argon 主题安装与默认设置 =============
+cd /home/build/immortalwrt || exit 1   # 可省略，但保留安全
+
+# 更新 feeds 并安装主题包（确保包可用）
+./scripts/feeds update -a
+./scripts/feeds install luci-theme-argon luci-app-argon-config
+
+# 配置 .config
 [ ! -f .config ] && make defconfig
 ./scripts/config --set-val CONFIG_PACKAGE_luci-theme-bootstrap n
 ./scripts/config --set-val CONFIG_PACKAGE_luci-theme-bootstrap-dark n
@@ -120,13 +126,34 @@ cd /home/build/immortalwrt || exit 1
 ./scripts/config --set-val CONFIG_PACKAGE_luci-app-argon-config y
 make defconfig
 
-# 设置默认主题为 Argon
-mkdir -p /home/build/immortalwrt/files/etc/config
-cat << EOF > /home/build/immortalwrt/files/etc/config/luci
+# 验证配置
+if grep -q "CONFIG_PACKAGE_luci-theme-argon=y" .config; then
+    echo "✅ Argon theme enabled in .config"
+else
+    echo "⚠️ Argon theme not enabled, forcing via oldconfig..."
+    echo "CONFIG_PACKAGE_luci-theme-argon=y" >> .config
+    echo "CONFIG_PACKAGE_luci-app-argon-config=y" >> .config
+    make oldconfig
+fi
+
+# 创建 uci-defaults 强制默认主题（优先级高于 /etc/config/luci）
+mkdir -p files/etc/uci-defaults
+cat << 'EOF' > files/etc/uci-defaults/99-set-argon-theme
+#!/bin/sh
+uci set luci.main.theme='argon'
+uci commit luci
+rm -f /etc/uci-defaults/99-set-argon-theme
+exit 0
+EOF
+chmod +x files/etc/uci-defaults/99-set-argon-theme
+
+# 同时保留 /etc/config/luci 作为备用
+mkdir -p files/etc/config
+cat << EOF > files/etc/config/luci
 config luci 'main'
     option theme 'argon'
 EOF
-
+# =====================================================
 make image PROFILE="generic" PACKAGES="$PACKAGES" FILES="/home/build/immortalwrt/files" ROOTFS_PARTSIZE=$PROFILE
 
 if [ $? -ne 0 ]; then
